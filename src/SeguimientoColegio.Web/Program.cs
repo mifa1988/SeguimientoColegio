@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using SeguimientoColegio.Web.Configuration;
 using SeguimientoColegio.Web.Constants;
 using SeguimientoColegio.Web.Data;
@@ -31,7 +32,7 @@ public class Program
         {
             options.UseMySql(
                 connectionString,
-                ServerVersion.AutoDetect(connectionString),
+                CrearVersionServidor(builder.Configuration),
                 mysqlOptions => mysqlOptions.EnableRetryOnFailure(3));
         });
 
@@ -127,7 +128,21 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-            await initializer.InitializeAsync(CancellationToken.None);
+            try
+            {
+                await initializer.InitializeAsync(CancellationToken.None);
+            }
+            catch (MySqlException ex)
+            {
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogCritical(
+                    ex,
+                    "No se pudo conectar a MySQL/MariaDB. Verifica host, puerto, usuario, password y permisos del usuario desde la IP cliente.");
+
+                throw new InvalidOperationException(
+                    "No se pudo inicializar la base de datos. Verifica la cadena de conexion y que MySQL/MariaDB permita el acceso del usuario configurado desde tu IP publica.",
+                    ex);
+            }
         }
 
         app.MapControllerRoute(
@@ -135,5 +150,19 @@ public class Program
             pattern: "{controller=Dashboard}/{action=Index}/{id?}");
 
         await app.RunAsync();
+    }
+
+    private static ServerVersion CrearVersionServidor(IConfiguration configuration)
+    {
+        var versionText = configuration["BaseDeDatos:VersionServidor"];
+        var version = Version.TryParse(versionText, out var parsedVersion)
+            ? parsedVersion
+            : new Version(10, 6, 0);
+
+        var tipoServidor = configuration["BaseDeDatos:TipoServidor"] ?? "MariaDb";
+
+        return string.Equals(tipoServidor, "MySql", StringComparison.OrdinalIgnoreCase)
+            ? new MySqlServerVersion(version)
+            : new MariaDbServerVersion(version);
     }
 }

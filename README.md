@@ -130,7 +130,9 @@ Edita la cadena de conexion local con los valores reales del entorno:
     "Apellidos": "Local"
   },
   "BaseDeDatos": {
-    "AplicarMigracionesAlInicio": false
+    "AplicarMigracionesAlInicio": false,
+    "TipoServidor": "MariaDb",
+    "VersionServidor": "10.6.0"
   }
 }
 ```
@@ -154,6 +156,49 @@ mysql -h TU_HOST -P 3306 -u TU_USUARIO -p PRACTICAR_CE < database\002_seed.sql
 Tambien puedes abrir los scripts en MySQL Workbench, DBeaver o HeidiSQL y ejecutarlos sobre `PRACTICAR_CE`.
 
 Las migraciones EF estan en `src/SeguimientoColegio.Web/Data/Migrations`. Por defecto la app no aplica migraciones al iniciar para evitar cambios automaticos no deseados sobre la base real.
+
+## Solucion De Problemas MySQL
+
+Si aparece un error similar a:
+
+```text
+Access denied for user 'TU_USUARIO'@'TU_IP_PUBLICA' (using password: YES)
+```
+
+La aplicacion llego al servidor MySQL/MariaDB, pero el motor rechazo el acceso. Normalmente se debe a una de estas causas:
+
+- La contrasena configurada en `appsettings.Local.json` no coincide.
+- El usuario existe, pero no tiene permiso para conectarse desde tu IP publica.
+- El usuario tiene permiso sobre otro host, por ejemplo `localhost`, pero no sobre `%` o tu IP.
+- El usuario no tiene privilegios sobre la base `PRACTICAR_CE`.
+
+Validacion recomendada desde una cuenta administradora de MySQL:
+
+```sql
+SELECT user, host FROM mysql.user WHERE user = 'TU_USUARIO';
+SHOW GRANTS FOR 'TU_USUARIO'@'%';
+SHOW GRANTS FOR 'TU_USUARIO'@'TU_IP_PUBLICA';
+```
+
+Ejemplo para habilitar acceso solo desde tu IP publica:
+
+```sql
+CREATE USER IF NOT EXISTS 'TU_USUARIO'@'TU_IP_PUBLICA' IDENTIFIED BY 'TU_PASSWORD';
+ALTER USER 'TU_USUARIO'@'TU_IP_PUBLICA' IDENTIFIED BY 'TU_PASSWORD';
+GRANT ALL PRIVILEGES ON PRACTICAR_CE.* TO 'TU_USUARIO'@'TU_IP_PUBLICA';
+FLUSH PRIVILEGES;
+```
+
+Ejemplo mas amplio, util solo si aceptas permitir varias IPs:
+
+```sql
+CREATE USER IF NOT EXISTS 'TU_USUARIO'@'%' IDENTIFIED BY 'TU_PASSWORD';
+ALTER USER 'TU_USUARIO'@'%' IDENTIFIED BY 'TU_PASSWORD';
+GRANT ALL PRIVILEGES ON PRACTICAR_CE.* TO 'TU_USUARIO'@'%';
+FLUSH PRIVILEGES;
+```
+
+Como el error es `Access denied`, no parece ser bloqueo de firewall: la conexion si llega al motor, pero falla la autenticacion/autorizacion.
 
 ## Ejecucion Local
 
