@@ -1,0 +1,57 @@
+@model CatalogoConOrdenFormPageViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Subtitle"] = Model.DescripcionPagina;
+}
+
+<section class="page-card">
+    <div class="toolbar">
+        <div>
+            <h2>@Model.Titulo</h2>
+            <p class="text-soft mb-0">@Model.DescripcionPagina</p>
+        </div>
+    </div>
+
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div class="form-grid form-grid--three">
+            <div class="field">
+                <label asp-for="Form.Nombre">Nombre</label>
+                <input asp-for="Form.Nombre" class="app-input" />
+                <span asp-validation-for="Form.Nombre"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Form.Orden">Orden</label>
+                <input asp-for="Form.Orden" class="app-input" />
+                <span asp-validation-for="Form.Orden"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Form.ColorCss">Color CSS</label>
+                <input asp-for="Form.ColorCss" class="app-input" placeholder="#1f6feb" />
+                <span asp-validation-for="Form.ColorCss"></span>
+            </div>
+        </div>
+
+        <div class="field mt-2">
+            <label asp-for="Form.Descripcion">Descripcion</label>
+            <textarea asp-for="Form.Descripcion" class="app-textarea"></textarea>
+            <span asp-validation-for="Form.Descripcion"></span>
+        </div>
+
+        <div class="checkbox-row mt-2">
+            <input asp-for="Form.Activo" />
+            <label asp-for="Form.Activo" class="mb-0">Activo</label>
+        </div>
+
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--primary">Guardar</button>
+            <a asp-controller="@Model.ControllerName" asp-action="Index" class="btn-app btn-app--ghost">Volver</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

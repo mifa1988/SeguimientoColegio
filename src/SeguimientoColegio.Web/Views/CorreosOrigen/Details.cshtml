@@ -1,0 +1,69 @@
+@model CorreoOrigenDetailViewModel
+@{
+    ViewData["Title"] = "Detalle de correo";
+    ViewData["Subtitle"] = "Consulta el correo origen y los registros creados a partir de el.";
+}
+
+<section class="page-card">
+    <div class="form-grid">
+        <div class="field">
+            <label>Asunto</label>
+            <div class="app-input">@Model.Correo.Asunto</div>
+        </div>
+        <div class="field">
+            <label>Remitente</label>
+            <div class="app-input">@Model.Correo.Remitente</div>
+        </div>
+        <div class="field">
+            <label>Fecha correo</label>
+            <div class="app-input">@Model.Correo.FechaCorreo.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+        <div class="field">
+            <label>Referencia</label>
+            <div class="app-input">@if (!string.IsNullOrWhiteSpace(Model.ReferenciaUrl)) { <a href="@Model.ReferenciaUrl" target="_blank" rel="noreferrer">@Model.ReferenciaUrl</a> } else { <text>-</text> }</div>
+        </div>
+        <div class="field">
+            <label>Resumen</label>
+            <div class="app-textarea">@Model.Correo.Resumen</div>
+        </div>
+        <div class="field">
+            <label>Observaciones</label>
+            <div class="app-textarea">@Model.Observaciones</div>
+        </div>
+    </div>
+</section>
+
+<section class="table-card mt-3">
+    <div class="toolbar">
+        <div>
+            <h2>Registros relacionados</h2>
+            <p class="text-soft mb-0">Elementos escolares vinculados a este correo.</p>
+        </div>
+    </div>
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Registro</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.RegistrosRelacionados)
+                {
+                    <tr>
+                        <td>
+                            <div class="record-title">
+                                <a asp-controller="Registros" asp-action="Details" asp-route-id="@item.Id">@item.Titulo</a>
+                                <span class="text-soft">@item.Nino - @(item.Disciplina ?? "Sin disciplina")</span>
+                            </div>
+                        </td>
+                        <td><span class="status-chip" style="background:@item.EstadoColorCss">@item.Estado</span></td>
+                        <td>@item.FechaRecibido.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

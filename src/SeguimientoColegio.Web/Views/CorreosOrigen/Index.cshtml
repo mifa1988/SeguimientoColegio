@@ -1,0 +1,57 @@
+@model CorreosOrigenIndexViewModel
+@{
+    ViewData["Title"] = "Correos origen";
+    ViewData["Subtitle"] = "Registro manual de correos relevantes para futura integracion con Gmail.";
+    var puedeEditar = User.IsInRole(AppRoles.Administrador) || User.IsInRole(AppRoles.Editor);
+}
+
+<section class="page-card">
+    <form method="get" class="toolbar">
+        <div class="field" style="min-width:320px;">
+            <label for="search">Busqueda</label>
+            <input id="search" name="search" value="@Model.Search" class="app-input" placeholder="Asunto, remitente o resumen" />
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn-app btn-app--ghost">Buscar</button>
+            @if (puedeEditar)
+            {
+                <a asp-action="Create" class="btn-app btn-app--primary">Nuevo correo</a>
+            }
+        </div>
+    </form>
+</section>
+
+<section class="table-card mt-3">
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Correo</th>
+                    <th>Fecha</th>
+                    <th>Registros</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.Asunto</strong>
+                            <span class="text-soft">@item.Remitente</span>
+                        </td>
+                        <td>@item.FechaCorreo.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><span class="badge-count">@item.RegistrosRelacionados</span></td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn-app btn-app--ghost btn-app--compact">Detalle</a>
+                            @if (puedeEditar)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-app btn-app--ghost btn-app--compact">Editar</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

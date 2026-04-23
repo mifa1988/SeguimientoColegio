@@ -1,0 +1,23 @@
+@model RegistroEditorViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Subtitle"] = Model.ModoAcuerdos
+        ? "Actualiza acuerdos, comentarios y nuevas evidencias."
+        : "Actualiza seguimiento, fechas, comentarios y archivos del registro.";
+}
+
+<section class="page-card">
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+        <partial name="_Form" model="Model" />
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--primary">Guardar cambios</button>
+            <a asp-action="Details" asp-route-id="@Context.Request.RouteValues["id"]" class="btn-app btn-app--ghost">Volver al detalle</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

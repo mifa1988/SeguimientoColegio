@@ -1,0 +1,21 @@
+@model UsuarioFormPageViewModel
+@{
+    ViewData["Title"] = "Nuevo usuario";
+    ViewData["Subtitle"] = "Crea un nuevo acceso para administrar o consultar el sistema.";
+}
+
+<section class="page-card">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+        <partial name="_Form" model="Model" />
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--primary">Guardar</button>
+            <a asp-action="Index" class="btn-app btn-app--ghost">Volver</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

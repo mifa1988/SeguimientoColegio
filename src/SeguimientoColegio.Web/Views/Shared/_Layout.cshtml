@@ -1,0 +1,133 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@inject ISelectorNinoService SelectorNinoService
+@inject IUsuarioActualService UsuarioActualService
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var statusMessage = TempData["StatusMessage"] as string;
+    var statusTone = TempData["StatusTone"] as string ?? "success";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var esAdministrador = User.IsInRole(AppRoles.Administrador);
+    var pageTitle = ViewData["Title"] as string ?? "Seguimiento escolar";
+    var pageSubtitle = ViewData["Subtitle"] as string;
+    var currentPath = Context.Request.Path + Context.Request.QueryString;
+    var selectedNinoId = isAuthenticated ? await SelectorNinoService.ObtenerNinoSeleccionadoAsync(Context.RequestAborted) : null;
+    var ninoOptions = isAuthenticated
+        ? await SelectorNinoService.ObtenerOpcionesAsync(selectedNinoId, Context.RequestAborted)
+        : Array.Empty<SelectListItem>();
+
+    string NavClass(string controller)
+        => string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "is-active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle - Seguimiento escolar</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SeguimientoColegio.Web.styles.css" asp-append-version="true" />
+</head>
+<body>
+    @if (isAuthenticated)
+    {
+        <div class="app-shell">
+            <aside class="sidebar" data-sidebar>
+                <div class="sidebar__brand">
+                    <span class="sidebar__eyebrow">Seguimiento</span>
+                    <strong>Control escolar</strong>
+                    <span>Registro, seguimiento y alertas</span>
+                </div>
+
+                <nav class="sidebar__nav">
+                    <span class="sidebar__section">Panel</span>
+                    <a asp-controller="Dashboard" asp-action="Index" class="@NavClass("Dashboard")">Dashboard</a>
+                    <a asp-controller="Alertas" asp-action="Index" class="@NavClass("Alertas")">Control y alertas</a>
+                    <a asp-controller="Registros" asp-action="Index" class="@NavClass("Registros")">Registros</a>
+                    <a asp-controller="Acuerdos" asp-action="Index" class="@NavClass("Acuerdos")">Acuerdos</a>
+                    <a asp-controller="CorreosOrigen" asp-action="Index" class="@NavClass("CorreosOrigen")">Correos origen</a>
+
+                    @if (esAdministrador)
+                    {
+                        <span class="sidebar__section">Catalogos</span>
+                        <a asp-controller="Ninos" asp-action="Index" class="@NavClass("Ninos")">Ninos</a>
+                        <a asp-controller="Disciplinas" asp-action="Index" class="@NavClass("Disciplinas")">Disciplinas</a>
+                        <a asp-controller="Plataformas" asp-action="Index" class="@NavClass("Plataformas")">Plataformas</a>
+                        <a asp-controller="TiposRegistro" asp-action="Index" class="@NavClass("TiposRegistro")">Tipos de registro</a>
+                        <a asp-controller="Estados" asp-action="Index" class="@NavClass("Estados")">Estados</a>
+                        <a asp-controller="Prioridades" asp-action="Index" class="@NavClass("Prioridades")">Prioridades</a>
+                        <a asp-controller="Usuarios" asp-action="Index" class="@NavClass("Usuarios")">Usuarios</a>
+                    }
+                </nav>
+            </aside>
+
+            <div class="app-main">
+                <header class="topbar">
+                    <div class="topbar__titleblock">
+                        <button type="button" class="topbar__navtoggle" data-nav-toggle aria-label="Abrir menu">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </button>
+                        <div>
+                            <h1>@pageTitle</h1>
+                            @if (!string.IsNullOrWhiteSpace(pageSubtitle))
+                            {
+                                <p>@pageSubtitle</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="topbar__actions">
+                        <form asp-controller="Context" asp-action="SeleccionarNino" method="post" class="inline-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="returnUrl" value="@currentPath" />
+                            <label class="compact-label">
+                                <span>Nino activo</span>
+                                <select name="ninoId" class="app-select app-select--compact" onchange="this.form.submit()">
+                                    <option value="">Todos</option>
+                                    @foreach (var option in ninoOptions)
+                                    {
+                                        <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                                    }
+                                </select>
+                            </label>
+                        </form>
+
+                        <div class="session-pill">
+                            <strong>@(UsuarioActualService.Nombre ?? "Sesion activa")</strong>
+                            <span>@(UsuarioActualService.Rol ?? "Usuario")</span>
+                        </div>
+
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="inline-form">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-app btn-app--ghost">Salir</button>
+                        </form>
+                    </div>
+                </header>
+
+                <div class="content-shell">
+                    @if (!string.IsNullOrWhiteSpace(statusMessage))
+                    {
+                        <div class="flash-banner flash-banner--@statusTone">@statusMessage</div>
+                    }
+
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <main class="auth-shell">
+            @RenderBody()
+        </main>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

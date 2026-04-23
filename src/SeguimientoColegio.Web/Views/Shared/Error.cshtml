@@ -1,0 +1,22 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+    ViewData["Subtitle"] = "No se pudo completar la operacion solicitada.";
+}
+
+<section class="page-card">
+    <div class="toolbar">
+        <div>
+            <h2>Ocurrio un error</h2>
+            <p class="text-soft mb-0">Intenta nuevamente. Si el problema continua, revisa los logs de la aplicacion.</p>
+        </div>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn-app btn-app--ghost">Volver al dashboard</a>
+    </div>
+
+    @if (Model.ShowRequestId)
+    {
+        <p class="text-soft mt-3 mb-0">
+            Codigo de seguimiento: <code>@Model.RequestId</code>
+        </p>
+    }
+</section>

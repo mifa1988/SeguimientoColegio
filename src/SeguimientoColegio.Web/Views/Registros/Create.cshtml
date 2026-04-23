@@ -1,0 +1,23 @@
+@model RegistroEditorViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Subtitle"] = Model.ModoAcuerdos
+        ? "Registra acuerdos con profesoras, fechas compromiso y evidencias fotograficas."
+        : "Registro rapido y estructurado de informacion escolar relevante.";
+}
+
+<section class="page-card">
+    <form method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly"></div>
+        <partial name="_Form" model="Model" />
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--primary">Guardar</button>
+            <a asp-action="Index" asp-controller="@(Model.ModoAcuerdos ? "Acuerdos" : "Registros")" class="btn-app btn-app--ghost">Volver</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

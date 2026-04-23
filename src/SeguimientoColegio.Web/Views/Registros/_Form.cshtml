@@ -1,0 +1,195 @@
+@model RegistroEditorViewModel
+
+<input asp-for="ModoAcuerdos" type="hidden" />
+
+<div class="form-grid form-grid--three">
+    <div class="field">
+        <label asp-for="Form.NinoId">Nino</label>
+        <select asp-for="Form.NinoId" asp-items="Model.Ninos" class="app-select"></select>
+        <span asp-validation-for="Form.NinoId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.DisciplinaId">Disciplina @(Model.ModoAcuerdos ? "(opcional)" : string.Empty)</label>
+        <select asp-for="Form.DisciplinaId" asp-items="Model.Disciplinas" class="app-select"></select>
+        <span asp-validation-for="Form.DisciplinaId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.TipoRegistroId">Tipo</label>
+        <select asp-for="Form.TipoRegistroId" asp-items="Model.TiposRegistro" class="app-select"></select>
+        <span asp-validation-for="Form.TipoRegistroId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.PlataformaId">Plataforma</label>
+        <select asp-for="Form.PlataformaId" asp-items="Model.Plataformas" class="app-select"></select>
+        <span asp-validation-for="Form.PlataformaId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.CorreoOrigenId">Correo origen</label>
+        <select asp-for="Form.CorreoOrigenId" asp-items="Model.CorreosOrigen" class="app-select"></select>
+        <span asp-validation-for="Form.CorreoOrigenId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.EstadoSeguimientoId">Estado</label>
+        <select asp-for="Form.EstadoSeguimientoId" asp-items="Model.Estados" class="app-select"></select>
+        <span asp-validation-for="Form.EstadoSeguimientoId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.PrioridadId">Prioridad</label>
+        <select asp-for="Form.PrioridadId" asp-items="Model.Prioridades" class="app-select"></select>
+        <span asp-validation-for="Form.PrioridadId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.FechaRecibido">Fecha recibido</label>
+        <input asp-for="Form.FechaRecibido" class="app-input" />
+        <span asp-validation-for="Form.FechaRecibido"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.FechaVencimiento">Fecha vencimiento</label>
+        <input asp-for="Form.FechaVencimiento" class="app-input" />
+        <span asp-validation-for="Form.FechaVencimiento"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.FechaRealizado">Fecha realizado</label>
+        <input asp-for="Form.FechaRealizado" class="app-input" />
+        <span asp-validation-for="Form.FechaRealizado"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.DiasAlerta">Dias de alerta</label>
+        <input asp-for="Form.DiasAlerta" class="app-input" />
+        <span asp-validation-for="Form.DiasAlerta"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.ResponsablePrincipal">Responsable principal</label>
+        <input asp-for="Form.ResponsablePrincipal" class="app-input" />
+        <span asp-validation-for="Form.ResponsablePrincipal"></span>
+    </div>
+</div>
+
+<div class="field mt-2">
+    <label asp-for="Form.Titulo">Titulo</label>
+    <input asp-for="Form.Titulo" class="app-input" />
+    <span asp-validation-for="Form.Titulo"></span>
+</div>
+
+<div class="field mt-2">
+    <label asp-for="Form.Descripcion">Descripcion</label>
+    <textarea asp-for="Form.Descripcion" class="app-textarea"></textarea>
+    <span asp-validation-for="Form.Descripcion"></span>
+</div>
+
+<div class="field mt-2">
+    <label asp-for="Form.ComentarioGeneral">Comentario general</label>
+    <textarea asp-for="Form.ComentarioGeneral" class="app-textarea"></textarea>
+    <span asp-validation-for="Form.ComentarioGeneral"></span>
+</div>
+
+<div class="checkbox-row mt-2">
+    <input asp-for="Form.RequiereSeguimiento" />
+    <label asp-for="Form.RequiereSeguimiento" class="mb-0">Requiere seguimiento</label>
+</div>
+
+<div class="checkbox-row mt-2">
+    <input asp-for="Form.Activo" />
+    <label asp-for="Form.Activo" class="mb-0">Activo</label>
+</div>
+
+<section class="page-card mt-3">
+    <div class="toolbar">
+        <div>
+            <h2>URLs asociadas</h2>
+            <p class="text-soft mb-0">Agrega una o varias referencias para el registro.</p>
+        </div>
+        <button type="button" class="btn-app btn-app--ghost btn-app--compact" data-add-url>Nueva URL</button>
+    </div>
+
+    <div class="url-repeater" data-url-repeater>
+        <div data-url-rows>
+            @for (var i = 0; i < Model.Form.Urls.Count; i++)
+            {
+                <div class="page-card mt-2" data-url-row>
+                    <input asp-for="Form.Urls[i].Id" type="hidden" />
+                    <div class="form-grid form-grid--three">
+                        <div class="field">
+                            <label asp-for="Form.Urls[i].Url">URL</label>
+                            <input asp-for="Form.Urls[i].Url" class="app-input" />
+                            <span asp-validation-for="Form.Urls[i].Url"></span>
+                        </div>
+                        <div class="field">
+                            <label asp-for="Form.Urls[i].Descripcion">Descripcion</label>
+                            <input asp-for="Form.Urls[i].Descripcion" class="app-input" />
+                            <span asp-validation-for="Form.Urls[i].Descripcion"></span>
+                        </div>
+                        <div class="field">
+                            <label asp-for="Form.Urls[i].Orden">Orden</label>
+                            <input asp-for="Form.Urls[i].Orden" class="app-input" data-url-order />
+                            <span asp-validation-for="Form.Urls[i].Orden"></span>
+                        </div>
+                    </div>
+                    <div class="form-actions mt-2">
+                        <button type="button" class="btn-app btn-app--ghost btn-app--compact" data-remove-url>Quitar</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <template>
+            <div class="page-card mt-2" data-url-row>
+                <input name="Form.Urls[__index__].Id" type="hidden" value="" />
+                <div class="form-grid form-grid--three">
+                    <div class="field">
+                        <label for="Form_Urls___index___Url">URL</label>
+                        <input id="Form_Urls___index___Url" name="Form.Urls[__index__].Url" class="app-input" />
+                    </div>
+                    <div class="field">
+                        <label for="Form_Urls___index___Descripcion">Descripcion</label>
+                        <input id="Form_Urls___index___Descripcion" name="Form.Urls[__index__].Descripcion" class="app-input" />
+                    </div>
+                    <div class="field">
+                        <label for="Form_Urls___index___Orden">Orden</label>
+                        <input id="Form_Urls___index___Orden" name="Form.Urls[__index__].Orden" class="app-input" data-url-order />
+                    </div>
+                </div>
+                <div class="form-actions mt-2">
+                    <button type="button" class="btn-app btn-app--ghost btn-app--compact" data-remove-url>Quitar</button>
+                </div>
+            </div>
+        </template>
+    </div>
+</section>
+
+<section class="page-card mt-3">
+    <div class="toolbar">
+        <div>
+            <h2>Evidencias y adjuntos</h2>
+            <p class="text-soft mb-0">Sube fotos, capturas, PDFs o cualquier evidencia relevante.</p>
+        </div>
+    </div>
+    <div class="field">
+        <label asp-for="Form.NuevosAdjuntos">Nuevos adjuntos</label>
+        <input asp-for="Form.NuevosAdjuntos" type="file" multiple class="app-input" />
+        <span asp-validation-for="Form.NuevosAdjuntos"></span>
+    </div>
+
+    @if (Model.EvidenciasExistentes.Count > 0)
+    {
+        <div class="mt-3">
+            <strong>Adjuntos ya cargados</strong>
+            <div class="mt-2">
+                @foreach (var evidencia in Model.EvidenciasExistentes)
+                {
+                    <div class="page-card mt-2">
+                        <div class="toolbar">
+                            <div>
+                                <strong>@evidencia.NombreArchivo</strong>
+                                <span class="text-soft">@evidencia.SubidoPor - @evidencia.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div class="form-actions">
+                                <a asp-controller="Adjuntos" asp-action="Download" asp-route-id="@evidencia.Id" class="btn-app btn-app--ghost btn-app--compact">Descargar</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</section>

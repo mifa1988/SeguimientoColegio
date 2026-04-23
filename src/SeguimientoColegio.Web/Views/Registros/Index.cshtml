@@ -1,0 +1,148 @@
+@model RegistrosIndexViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Subtitle"] = Model.ModoAcuerdos
+        ? "Seguimiento de acuerdos con profesoras, compromisos y evidencias."
+        : "Listado principal con filtros, alertas visibles y acceso rapido al detalle.";
+    var createUrl = Model.ModoAcuerdos
+        ? Url.Action("Create", "Acuerdos")
+        : Url.Action("Create", "Registros");
+    var puedeEditar = User.IsInRole(AppRoles.Administrador) || User.IsInRole(AppRoles.Editor);
+}
+
+<section class="page-card">
+    <form method="get">
+        <div class="form-grid form-grid--three">
+            <div class="field">
+                <label asp-for="Filtros.NinoId">Nino</label>
+                <select asp-for="Filtros.NinoId" asp-items="Model.Ninos" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.DisciplinaId">Disciplina</label>
+                <select asp-for="Filtros.DisciplinaId" asp-items="Model.Disciplinas" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.TipoRegistroId">Tipo</label>
+                <select asp-for="Filtros.TipoRegistroId" asp-items="Model.TiposRegistro" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.PlataformaId">Plataforma</label>
+                <select asp-for="Filtros.PlataformaId" asp-items="Model.Plataformas" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.EstadoSeguimientoId">Estado</label>
+                <select asp-for="Filtros.EstadoSeguimientoId" asp-items="Model.Estados" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.PrioridadId">Prioridad</label>
+                <select asp-for="Filtros.PrioridadId" asp-items="Model.Prioridades" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaRecibidoDesde">Fecha recibido desde</label>
+                <input asp-for="Filtros.FechaRecibidoDesde" class="app-input" />
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaRecibidoHasta">Fecha recibido hasta</label>
+                <input asp-for="Filtros.FechaRecibidoHasta" class="app-input" />
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaVencimientoDesde">Fecha vencimiento desde</label>
+                <input asp-for="Filtros.FechaVencimientoDesde" class="app-input" />
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaVencimientoHasta">Fecha vencimiento hasta</label>
+                <input asp-for="Filtros.FechaVencimientoHasta" class="app-input" />
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaRealizadoDesde">Fecha realizado desde</label>
+                <input asp-for="Filtros.FechaRealizadoDesde" class="app-input" />
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.FechaRealizadoHasta">Fecha realizado hasta</label>
+                <input asp-for="Filtros.FechaRealizadoHasta" class="app-input" />
+            </div>
+        </div>
+
+        <div class="field mt-2">
+            <label asp-for="Filtros.Texto">Texto libre</label>
+            <input asp-for="Filtros.Texto" class="app-input" placeholder="Titulo, descripcion, comentario, correo o responsable" />
+        </div>
+
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--ghost">Aplicar filtros</button>
+            <a asp-action="Index" asp-controller="@(Model.ModoAcuerdos ? "Acuerdos" : "Registros")" class="btn-app btn-app--ghost">Limpiar</a>
+            @if (puedeEditar)
+            {
+                <a href="@createUrl" class="btn-app btn-app--primary">Nuevo</a>
+            }
+        </div>
+    </form>
+</section>
+
+<section class="table-card mt-3">
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Registro</th>
+                    <th>Estado / prioridad</th>
+                    <th>Fechas</th>
+                    <th>Alertas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Registros)
+                {
+                    <tr>
+                        <td>
+                            <div class="record-title">
+                                <a asp-action="Details" asp-route-id="@item.Id">@item.Titulo</a>
+                                <span class="text-soft">@item.Nino - @(item.Disciplina ?? "Sin disciplina") - @item.TipoRegistro</span>
+                                <span class="text-soft">@if (!string.IsNullOrWhiteSpace(item.Plataforma)) { <text>@item.Plataforma</text> } @if (!string.IsNullOrWhiteSpace(item.CorreoOrigenAsunto)) { <text> - @item.CorreoOrigenAsunto</text> }</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="record-title">
+                                <span class="status-chip" style="background:@item.EstadoColorCss">@item.Estado</span>
+                                @if (!string.IsNullOrWhiteSpace(item.Prioridad))
+                                {
+                                    <span class="status-chip" style="background:@(item.PrioridadColorCss ?? "#7a828f")">@item.Prioridad</span>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            <div class="record-title">
+                                <span>Recibido: @item.FechaRecibido.ToString("dd/MM/yyyy")</span>
+                                <span class="text-soft">Vence: @(item.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "-")</span>
+                                <span class="text-soft">Antiguedad: @item.AntiguedadDias d</span>
+                            </div>
+                        </td>
+                        <td>
+                            @if (item.Alertas.Count == 0)
+                            {
+                                <span class="text-soft">Sin alertas</span>
+                            }
+                            else
+                            {
+                                foreach (var badge in item.Alertas)
+                                {
+                                    <span class="alert-chip alert-chip--@badge.Severidad">@badge.Titulo</span>
+                                }
+                            }
+                        </td>
+                        <td>
+                            <div class="form-actions">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-app btn-app--ghost btn-app--compact">Detalle</a>
+                                @if (puedeEditar)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.Id" asp-route-modoAcuerdos="@Model.ModoAcuerdos" class="btn-app btn-app--ghost btn-app--compact">Editar</a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

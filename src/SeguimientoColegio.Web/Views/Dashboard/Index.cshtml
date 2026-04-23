@@ -1,0 +1,213 @@
+@model DashboardIndexViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["Subtitle"] = string.IsNullOrWhiteSpace(Model.AlcanceNino)
+        ? "Vista ejecutiva de pendientes, alertas y actividad reciente."
+        : $"Vista ejecutiva para {Model.AlcanceNino}.";
+}
+
+<section class="metric-grid">
+    <article class="metric-card">
+        <span>Pendientes</span>
+        <strong>@Model.Resumen.TotalPendientes</strong>
+        <small>Abiertos y por iniciar.</small>
+    </article>
+    <article class="metric-card">
+        <span>En proceso</span>
+        <strong>@Model.Resumen.TotalEnProceso</strong>
+        <small>Con avance parcial.</small>
+    </article>
+    <article class="metric-card">
+        <span>Concluidos</span>
+        <strong>@Model.Resumen.TotalConcluidos</strong>
+        <small>Cerrados correctamente.</small>
+    </article>
+    <article class="metric-card">
+        <span>Vencidos</span>
+        <strong>@Model.Resumen.TotalVencidos</strong>
+        <small>Requieren atencion inmediata.</small>
+    </article>
+    <article class="metric-card">
+        <span>Antiguos</span>
+        <strong>@Model.Resumen.PendientesAntiguos</strong>
+        <small>Sin cerrar por demasiados dias.</small>
+    </article>
+    <article class="metric-card">
+        <span>Acuerdos</span>
+        <strong>@Model.Resumen.AcuerdosPendientes</strong>
+        <small>Acuerdos con profesoras abiertos.</small>
+    </article>
+</section>
+
+<section class="summary-grid">
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>Pendientes por nino</h2>
+                <p class="text-soft mb-0">Distribucion actual de pendientes abiertos.</p>
+            </div>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Nino</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Resumen.PendientesPorNino)
+                    {
+                        <tr>
+                            <td>@item.Etiqueta</td>
+                            <td><span class="badge-count">@item.Total</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>Pendientes por disciplina</h2>
+                <p class="text-soft mb-0">Donde se concentra la carga de seguimiento.</p>
+            </div>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Disciplina</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Resumen.PendientesPorDisciplina)
+                    {
+                        <tr>
+                            <td>@item.Etiqueta</td>
+                            <td><span class="badge-count">@item.Total</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="summary-grid mt-3">
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>Ultimos creados</h2>
+                <p class="text-soft mb-0">Registros recien incorporados.</p>
+            </div>
+            <a asp-controller="Registros" asp-action="Index" class="btn-app btn-app--ghost btn-app--compact">Ver todos</a>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Estado</th>
+                        <th>Antig.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Resumen.UltimosRegistrosCreados)
+                    {
+                        <tr>
+                            <td>
+                                <div class="record-title">
+                                    <a asp-controller="Registros" asp-action="Details" asp-route-id="@item.Id">@item.Titulo</a>
+                                    <span class="text-soft">@item.Nino - @(item.Disciplina ?? "Sin disciplina")</span>
+                                </div>
+                            </td>
+                            <td><span class="status-chip" style="background:@item.EstadoColorCss">@item.Estado</span></td>
+                            <td>@item.AntiguedadDias d</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>Ultimos actualizados</h2>
+                <p class="text-soft mb-0">Registros con movimiento reciente.</p>
+            </div>
+            <a asp-controller="Alertas" asp-action="Index" class="btn-app btn-app--ghost btn-app--compact">Ir a control</a>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Resumen.UltimosRegistrosActualizados)
+                    {
+                        <tr>
+                            <td>
+                                <div class="record-title">
+                                    <a asp-controller="Registros" asp-action="Details" asp-route-id="@item.Id">@item.Titulo</a>
+                                    <span class="text-soft">@item.Nino - @(item.Disciplina ?? "Sin disciplina")</span>
+                                </div>
+                            </td>
+                            <td><span class="status-chip" style="background:@item.EstadoColorCss">@item.Estado</span></td>
+                            <td>@item.FechaActualizacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="table-card mt-3">
+    <div class="toolbar">
+        <div>
+            <h2>Alertas criticas</h2>
+            <p class="text-soft mb-0">Registros que necesitan atencion prioritaria.</p>
+        </div>
+        <a asp-controller="Alertas" asp-action="Index" asp-route-severidad="critica" class="btn-app btn-app--primary btn-app--compact">Ver control critico</a>
+    </div>
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Registro</th>
+                    <th>Alertas</th>
+                    <th>Antig.</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var alerta in Model.Resumen.AlertasCriticas)
+                {
+                    <tr>
+                        <td>
+                            <div class="record-title">
+                                <a asp-controller="Registros" asp-action="Details" asp-route-id="@alerta.RegistroId">@alerta.Titulo</a>
+                                <span class="text-soft">@alerta.Nino - @(alerta.Disciplina ?? "Sin disciplina")</span>
+                            </div>
+                        </td>
+                        <td>
+                            @foreach (var badge in alerta.Badges)
+                            {
+                                <span class="alert-chip alert-chip--@badge.Severidad">@badge.Titulo</span>
+                            }
+                        </td>
+                        <td>@alerta.AntiguedadDias d</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

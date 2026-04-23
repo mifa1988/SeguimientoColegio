@@ -1,0 +1,48 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesion";
+}
+
+<section class="login-shell">
+    <div class="login-card">
+        <h1>Seguimiento escolar</h1>
+        <p>Ingresa con tu correo y contrasena para registrar pendientes, acuerdos y evidencias.</p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="flash-banner flash-banner--error">@Model.ErrorMessage</div>
+        }
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input asp-for="Form.ReturnUrl" type="hidden" />
+            <div asp-validation-summary="ModelOnly"></div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label asp-for="Form.Correo">Correo</label>
+                    <input asp-for="Form.Correo" class="app-input" autocomplete="username" />
+                    <span asp-validation-for="Form.Correo"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Form.Password">Contrasena</label>
+                    <input asp-for="Form.Password" class="app-input" autocomplete="current-password" />
+                    <span asp-validation-for="Form.Password"></span>
+                </div>
+            </div>
+
+            <div class="checkbox-row mt-2">
+                <input asp-for="Form.Recordarme" />
+                <label asp-for="Form.Recordarme" class="mb-0">Mantener sesion abierta</label>
+            </div>
+
+            <div class="form-actions mt-3">
+                <button type="submit" class="btn-app btn-app--primary">Ingresar</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
