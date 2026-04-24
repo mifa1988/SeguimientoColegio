@@ -15,6 +15,7 @@ public interface IAuthService
     Task<ResultadoLogin> IniciarSesionAsync(HttpContext httpContext, LoginInputModel input, CancellationToken cancellationToken);
     Task CerrarSesionAsync(HttpContext httpContext);
     Task<ResultadoValidacionSesion> ValidarSesionAsync(ClaimsPrincipal? principal, CancellationToken cancellationToken);
+    Task<ClaimsPrincipal?> ObtenerPrincipalPorCorreoAsync(string? correo, CancellationToken cancellationToken);
 }
 
 public sealed record ResultadoLogin(bool Success, string? ErrorMessage = null);
@@ -66,7 +67,7 @@ public sealed class AuthService(
 
         await httpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
-            BuildPrincipal(usuario),
+            AppPrincipalFactory.Create(usuario),
             new AuthenticationProperties
             {
                 IsPersistent = input.Recordarme,
@@ -79,6 +80,27 @@ public sealed class AuthService(
 
     public Task CerrarSesionAsync(HttpContext httpContext)
         => httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+    public async Task<ClaimsPrincipal?> ObtenerPrincipalPorCorreoAsync(string? correo, CancellationToken cancellationToken)
+    {
+        var correoNormalizado = NormalizarCorreo(correo);
+        if (correoNormalizado is null)
+        {
+            return null;
+        }
+
+        var usuario = await dbContext.Usuarios
+            .AsNoTracking()
+            .Include(x => x.Rol)
+            .SingleOrDefaultAsync(x => x.Correo == correoNormalizado, cancellationToken);
+
+        if (usuario is null || !usuario.Activo || usuario.Rol is null)
+        {
+            return null;
+        }
+
+        return AppPrincipalFactory.Create(usuario);
+    }
 
     public async Task<ResultadoValidacionSesion> ValidarSesionAsync(ClaimsPrincipal? principal, CancellationToken cancellationToken)
     {
@@ -108,23 +130,8 @@ public sealed class AuthService(
             !string.Equals(rolActual, usuario.Rol.Nombre, StringComparison.Ordinal);
 
         return hasChanges
-            ? new ResultadoValidacionSesion(true, BuildPrincipal(usuario))
+            ? new ResultadoValidacionSesion(true, AppPrincipalFactory.Create(usuario))
             : new ResultadoValidacionSesion(true);
-    }
-
-    private static ClaimsPrincipal BuildPrincipal(Usuario usuario)
-    {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(AppClaimTypes.UsuarioId, usuario.Id.ToString()),
-            new(ClaimTypes.Name, usuario.NombreCompleto),
-            new(ClaimTypes.Email, usuario.Correo),
-            new(ClaimTypes.Role, usuario.Rol?.Nombre ?? AppRoles.Consulta)
-        };
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        return new ClaimsPrincipal(identity);
     }
 
     private static string? NormalizarCorreo(string? correo)

@@ -1,11 +1,13 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @inject ISelectorNinoService SelectorNinoService
 @inject IUsuarioActualService UsuarioActualService
+@inject Microsoft.Extensions.Options.IOptions<SeguimientoColegio.Web.Configuration.AutoAccessSettings> AutoAccessOptions
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
     var statusMessage = TempData["StatusMessage"] as string;
     var statusTone = TempData["StatusTone"] as string ?? "success";
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var accesoAutomaticoHabilitado = AutoAccessOptions.Value.Habilitado;
     var esAdministrador = User.IsInRole(AppRoles.Administrador);
     var pageTitle = ViewData["Title"] as string ?? "Seguimiento escolar";
     var pageSubtitle = ViewData["Subtitle"] as string;
@@ -100,10 +102,13 @@
                             <span>@(UsuarioActualService.Rol ?? "Usuario")</span>
                         </div>
 
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="inline-form">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-app btn-app--ghost">Salir</button>
-                        </form>
+                        @if (!accesoAutomaticoHabilitado)
+                        {
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="inline-form">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-app btn-app--ghost">Salir</button>
+                            </form>
+                        }
                     </div>
                 </header>
 

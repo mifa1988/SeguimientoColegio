@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MySqlConnector;
 using SeguimientoColegio.Web.Configuration;
 using SeguimientoColegio.Web.Constants;
@@ -27,6 +28,7 @@ public class Program
         builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection(FileStorageSettings.SectionName));
         builder.Services.Configure<BootstrapAdminSettings>(builder.Configuration.GetSection(BootstrapAdminSettings.SectionName));
         builder.Services.Configure<DatabaseStartupSettings>(builder.Configuration.GetSection(DatabaseStartupSettings.SectionName));
+        builder.Services.Configure<AutoAccessSettings>(builder.Configuration.GetSection(AutoAccessSettings.SectionName));
 
         builder.Services.AddDbContext<SeguimientoDbContext>(options =>
         {
@@ -123,6 +125,22 @@ public class Program
         app.UseRouting();
         app.UseSession();
         app.UseAuthentication();
+        app.Use(async (context, next) =>
+        {
+            var autoAccess = context.RequestServices.GetRequiredService<IOptions<AutoAccessSettings>>().Value;
+            if (autoAccess.Habilitado)
+            {
+                var authService = context.RequestServices.GetRequiredService<IAuthService>();
+                var principal = await authService.ObtenerPrincipalPorCorreoAsync(autoAccess.Correo, context.RequestAborted);
+
+                if (principal is not null)
+                {
+                    context.User = principal;
+                }
+            }
+
+            await next();
+        });
         app.UseAuthorization();
 
         using (var scope = app.Services.CreateScope())

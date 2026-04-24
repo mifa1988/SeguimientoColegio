@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using SeguimientoColegio.Web.Configuration;
 
 namespace SeguimientoColegio.Web.Data;
 
@@ -19,10 +20,19 @@ public sealed class SeguimientoDbContextFactory : IDesignTimeDbContextFactory<Se
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Server=localhost;Port=3306;Database=PRACTICAR_CE;User=root;Password=;SslMode=None;";
 
+        var versionText = configuration[$"{DatabaseStartupSettings.SectionName}:VersionServidor"];
+        var version = Version.TryParse(versionText, out var parsedVersion)
+            ? parsedVersion
+            : new Version(10, 6, 0);
+
+        var tipoServidor = configuration[$"{DatabaseStartupSettings.SectionName}:TipoServidor"] ?? "MariaDb";
+
         var optionsBuilder = new DbContextOptionsBuilder<SeguimientoDbContext>();
         optionsBuilder.UseMySql(
             connectionString,
-            new MariaDbServerVersion(new Version(10, 6, 0)));
+            string.Equals(tipoServidor, "MySql", StringComparison.OrdinalIgnoreCase)
+                ? new MySqlServerVersion(version)
+                : new MariaDbServerVersion(version));
 
         return new SeguimientoDbContext(optionsBuilder.Options);
     }
