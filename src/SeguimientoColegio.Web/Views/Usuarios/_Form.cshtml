@@ -1,0 +1,39 @@
+@model UsuarioFormPageViewModel
+
+<div class="form-grid">
+    <div class="field">
+        <label asp-for="Form.Nombres">Nombres</label>
+        <input asp-for="Form.Nombres" class="app-input" />
+        <span asp-validation-for="Form.Nombres"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.Apellidos">Apellidos</label>
+        <input asp-for="Form.Apellidos" class="app-input" />
+        <span asp-validation-for="Form.Apellidos"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.Correo">Correo</label>
+        <input asp-for="Form.Correo" class="app-input" />
+        <span asp-validation-for="Form.Correo"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.RolId">Rol</label>
+        <select asp-for="Form.RolId" asp-items="Model.Roles" class="app-select"></select>
+        <span asp-validation-for="Form.RolId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.Password">Contrasena</label>
+        <input asp-for="Form.Password" class="app-input" />
+        <span asp-validation-for="Form.Password"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Form.ConfirmPassword">Confirmar contrasena</label>
+        <input asp-for="Form.ConfirmPassword" class="app-input" />
+        <span asp-validation-for="Form.ConfirmPassword"></span>
+    </div>
+</div>
+
+<div class="checkbox-row mt-2">
+    <input asp-for="Form.Activo" />
+    <label asp-for="Form.Activo" class="mb-0">Activo</label>
+</div>

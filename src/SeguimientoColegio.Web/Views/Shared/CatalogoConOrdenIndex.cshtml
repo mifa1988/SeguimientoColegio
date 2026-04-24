@@ -1,0 +1,45 @@
+@model CatalogoConOrdenPageViewModel
+@{
+    ViewData["Title"] = Model.Titulo;
+    ViewData["Subtitle"] = Model.DescripcionPagina;
+}
+
+<section class="table-card">
+    <div class="toolbar">
+        <div>
+            <h2>@Model.Titulo</h2>
+            <p class="text-soft mb-0">@Model.DescripcionPagina</p>
+        </div>
+        <a asp-controller="@Model.ControllerName" asp-action="Create" class="btn-app btn-app--primary">Nuevo</a>
+    </div>
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Orden</th>
+                    <th>Color</th>
+                    <th>Activo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.Nombre</strong>
+                            <span class="text-soft">@item.Descripcion</span>
+                        </td>
+                        <td>@item.Orden</td>
+                        <td><span class="status-chip" style="background:@(item.ColorCss ?? "#7a828f")">@item.ColorCss</span></td>
+                        <td>@(item.Activo ? "Si" : "No")</td>
+                        <td class="text-end">
+                            <a asp-controller="@Model.ControllerName" asp-action="Edit" asp-route-id="@item.Id" class="btn-app btn-app--ghost btn-app--compact">Editar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

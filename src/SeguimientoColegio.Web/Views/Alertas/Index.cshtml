@@ -1,0 +1,73 @@
+@model AlertasIndexViewModel
+@{
+    ViewData["Title"] = "Control y alertas";
+    ViewData["Subtitle"] = "Vista operativa para detectar pendientes antiguos, vencidos y sin movimiento.";
+}
+
+<section class="page-card">
+    <form method="get">
+        <div class="form-grid form-grid--three">
+            <div class="field">
+                <label asp-for="Filtros.NinoId">Nino</label>
+                <select asp-for="Filtros.NinoId" asp-items="Model.Ninos" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.DisciplinaId">Disciplina</label>
+                <select asp-for="Filtros.DisciplinaId" asp-items="Model.Disciplinas" class="app-select"></select>
+            </div>
+            <div class="field">
+                <label asp-for="Filtros.Severidad">Severidad</label>
+                <select asp-for="Filtros.Severidad" class="app-select">
+                    <option value="">Todas</option>
+                    <option value="critica">Critica</option>
+                    <option value="advertencia">Advertencia</option>
+                    <option value="info">Info</option>
+                </select>
+            </div>
+        </div>
+        <div class="field mt-2">
+            <label asp-for="Filtros.Texto">Texto</label>
+            <input asp-for="Filtros.Texto" class="app-input" placeholder="Buscar por titulo, nino o disciplina" />
+        </div>
+        <div class="form-actions mt-3">
+            <button type="submit" class="btn-app btn-app--ghost">Aplicar filtros</button>
+            <a asp-action="Index" class="btn-app btn-app--ghost">Limpiar</a>
+        </div>
+    </form>
+</section>
+
+<section class="table-card mt-3">
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Registro</th>
+                    <th>Badges</th>
+                    <th>Antig.</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Alertas)
+                {
+                    <tr>
+                        <td>
+                            <strong>@item.Titulo</strong>
+                            <span class="text-soft">@item.Nino - @(item.Disciplina ?? "Sin disciplina") - @item.TipoRegistro</span>
+                        </td>
+                        <td>
+                            @foreach (var badge in item.Badges)
+                            {
+                                <span class="alert-chip alert-chip--@badge.Severidad">@badge.Titulo</span>
+                            }
+                        </td>
+                        <td>@item.AntiguedadDias d</td>
+                        <td class="text-end">
+                            <a asp-controller="Registros" asp-action="Details" asp-route-id="@item.RegistroId" class="btn-app btn-app--ghost btn-app--compact">Detalle</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

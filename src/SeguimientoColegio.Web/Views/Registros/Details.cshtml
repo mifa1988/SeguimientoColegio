@@ -1,0 +1,207 @@
+@model RegistroDetalleViewModel
+@{
+    ViewData["Title"] = "Detalle de registro";
+    ViewData["Subtitle"] = "Trazabilidad completa, adjuntos, URLs y control del estado.";
+    var puedeEditar = User.IsInRole(AppRoles.Administrador) || User.IsInRole(AppRoles.Editor);
+}
+
+<section class="page-card">
+    <div class="toolbar">
+        <div>
+            <h2>@Model.Registro.Titulo</h2>
+            <p class="text-soft mb-0">@Model.Registro.Nino - @(Model.Registro.Disciplina ?? "Sin disciplina") - @Model.Registro.TipoRegistro</p>
+        </div>
+        @if (puedeEditar)
+        {
+            <div class="form-actions">
+                <a asp-action="Edit" asp-route-id="@Model.Registro.Id" asp-route-modoAcuerdos="@(Model.Registro.TipoRegistroId == SeedDataIds.TiposRegistro.AcuerdoProfesora)" class="btn-app btn-app--primary">Editar</a>
+                <form asp-action="Deactivate" asp-route-id="@Model.Registro.Id" method="post" class="inline-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-app btn-app--ghost">Desactivar</button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <div class="summary-grid">
+        <div class="page-card">
+            <strong>Estado</strong>
+            <div class="mt-2">
+                <span class="status-chip" style="background:@Model.Registro.EstadoColorCss">@Model.Registro.Estado</span>
+                @if (!string.IsNullOrWhiteSpace(Model.Registro.Prioridad))
+                {
+                    <span class="status-chip" style="background:@(Model.Registro.PrioridadColorCss ?? "#7a828f")">@Model.Registro.Prioridad</span>
+                }
+            </div>
+            @if (Model.Registro.Alertas.Count > 0)
+            {
+                <div class="mt-2">
+                    @foreach (var badge in Model.Registro.Alertas)
+                    {
+                        <span class="alert-chip alert-chip--@badge.Severidad">@badge.Titulo</span>
+                    }
+                </div>
+            }
+        </div>
+        <div class="page-card">
+            <strong>Fechas</strong>
+            <div class="record-title mt-2">
+                <span>Recibido: @Model.Registro.FechaRecibido.ToString("dd/MM/yyyy")</span>
+                <span class="text-soft">Vencimiento: @(Model.Registro.FechaVencimiento?.ToString("dd/MM/yyyy") ?? "-")</span>
+                <span class="text-soft">Realizado: @(Model.Registro.FechaRealizado?.ToString("dd/MM/yyyy") ?? "-")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-grid mt-3">
+        <div class="field">
+            <label>Descripcion</label>
+            <div class="app-textarea">@Model.Registro.Descripcion</div>
+        </div>
+        <div class="field">
+            <label>Comentario general</label>
+            <div class="app-textarea">@Model.Registro.ComentarioGeneral</div>
+        </div>
+    </div>
+</section>
+
+@if (puedeEditar)
+{
+    <section class="page-card mt-3">
+        <div class="toolbar">
+            <div>
+                <h2>Cambio rapido de estado</h2>
+                <p class="text-soft mb-0">Actualiza el seguimiento sin entrar al formulario completo.</p>
+            </div>
+        </div>
+        <form asp-action="QuickStatus" asp-route-id="@Model.Registro.Id" method="post">
+            @Html.AntiForgeryToken()
+            <div class="form-grid">
+                <div class="field">
+                    <label for="estadoSeguimientoId">Nuevo estado</label>
+                    <select id="estadoSeguimientoId" name="estadoSeguimientoId" class="app-select">
+                        @foreach (var option in Model.Estados)
+                        {
+                            <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="comentario">Comentario</label>
+                    <textarea id="comentario" name="comentario" class="app-textarea"></textarea>
+                </div>
+            </div>
+            <div class="form-actions mt-3">
+                <button type="submit" class="btn-app btn-app--primary">Actualizar estado</button>
+            </div>
+        </form>
+    </section>
+}
+
+<section class="summary-grid mt-3">
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>URLs</h2>
+                <p class="text-soft mb-0">Referencias asociadas al registro.</p>
+            </div>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Descripcion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var url in Model.Registro.Urls)
+                    {
+                        <tr>
+                            <td><a href="@url.Url" target="_blank" rel="noreferrer">@url.Url</a></td>
+                            <td>@(url.Descripcion ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="table-card">
+        <div class="toolbar">
+            <div>
+                <h2>Evidencias</h2>
+                <p class="text-soft mb-0">Fotos, PDFs y archivos asociados.</p>
+            </div>
+        </div>
+        <div class="table-card__body">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Archivo</th>
+                        <th>Subido</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var evidencia in Model.Registro.Evidencias)
+                    {
+                        <tr>
+                            <td><strong>@evidencia.NombreArchivo</strong></td>
+                            <td>@evidencia.SubidoPor - @evidencia.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a asp-controller="Adjuntos" asp-action="Download" asp-route-id="@evidencia.Id" class="btn-app btn-app--ghost btn-app--compact">Descargar</a>
+                                @if (puedeEditar)
+                                {
+                                    <form asp-controller="Adjuntos" asp-action="Delete" asp-route-id="@evidencia.Id" asp-route-registroId="@Model.Registro.Id" method="post" class="inline-form">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-app btn-app--ghost btn-app--compact">Eliminar</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="table-card mt-3">
+    <div class="toolbar">
+        <div>
+            <h2>Historial y auditoria</h2>
+            <p class="text-soft mb-0">Trazabilidad de cambios, comentarios y acciones relevantes.</p>
+        </div>
+    </div>
+    <div class="table-card__body">
+        <table class="app-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Accion</th>
+                    <th>Detalle</th>
+                    <th>Usuario</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var entry in Model.Registro.Historial)
+                {
+                    <tr>
+                        <td>@entry.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@entry.Accion</td>
+                        <td>
+                            <strong>@(entry.CampoModificado ?? "-")</strong>
+                            <span class="text-soft">@entry.ValorAnterior @(string.IsNullOrWhiteSpace(entry.ValorAnterior) && string.IsNullOrWhiteSpace(entry.ValorNuevo) ? string.Empty : "->") @entry.ValorNuevo</span>
+                            @if (!string.IsNullOrWhiteSpace(entry.Comentario))
+                            {
+                                <div class="text-soft">@entry.Comentario</div>
+                            }
+                        </td>
+                        <td>@entry.Usuario</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

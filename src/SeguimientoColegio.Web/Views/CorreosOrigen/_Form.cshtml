@@ -1,0 +1,39 @@
+@model CorreoOrigenInputModel
+
+<div class="form-grid">
+    <div class="field">
+        <label asp-for="Asunto">Asunto</label>
+        <input asp-for="Asunto" class="app-input" />
+        <span asp-validation-for="Asunto"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Remitente">Remitente</label>
+        <input asp-for="Remitente" class="app-input" />
+        <span asp-validation-for="Remitente"></span>
+    </div>
+    <div class="field">
+        <label asp-for="FechaCorreo">Fecha del correo</label>
+        <input asp-for="FechaCorreo" class="app-input" />
+        <span asp-validation-for="FechaCorreo"></span>
+    </div>
+    <div class="field">
+        <label asp-for="ReferenciaUrl">Referencia o link</label>
+        <input asp-for="ReferenciaUrl" class="app-input" />
+        <span asp-validation-for="ReferenciaUrl"></span>
+    </div>
+    <div class="field">
+        <label asp-for="MessageId">Message ID</label>
+        <input asp-for="MessageId" class="app-input" />
+        <span asp-validation-for="MessageId"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Resumen">Resumen</label>
+        <textarea asp-for="Resumen" class="app-textarea"></textarea>
+        <span asp-validation-for="Resumen"></span>
+    </div>
+    <div class="field" style="grid-column: 1 / -1;">
+        <label asp-for="Observaciones">Observaciones</label>
+        <textarea asp-for="Observaciones" class="app-textarea"></textarea>
+        <span asp-validation-for="Observaciones"></span>
+    </div>
+</div>

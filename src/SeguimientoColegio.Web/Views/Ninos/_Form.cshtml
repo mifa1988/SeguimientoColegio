@@ -1,0 +1,29 @@
+@model NinoInputModel
+
+<div class="form-grid">
+    <div class="field">
+        <label asp-for="Nombres">Nombres</label>
+        <input asp-for="Nombres" class="app-input" />
+        <span asp-validation-for="Nombres"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Apellidos">Apellidos</label>
+        <input asp-for="Apellidos" class="app-input" />
+        <span asp-validation-for="Apellidos"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Alias">Alias</label>
+        <input asp-for="Alias" class="app-input" />
+        <span asp-validation-for="Alias"></span>
+    </div>
+    <div class="field">
+        <label asp-for="FechaNacimiento">Fecha de nacimiento</label>
+        <input asp-for="FechaNacimiento" class="app-input" />
+        <span asp-validation-for="FechaNacimiento"></span>
+    </div>
+</div>
+
+<div class="checkbox-row mt-2">
+    <input asp-for="Activo" />
+    <label asp-for="Activo" class="mb-0">Activo</label>
+</div>
